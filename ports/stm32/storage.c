@@ -349,6 +349,11 @@ bool storage_read_block(uint8_t *dest, uint32_t block) {
 
         return true;
 
+    } else if (block < FLASH_PART1_START_BLOCK) {
+        // fake all other blocks to be empty, 0xff is the value of erased flash cells
+        memset(dest, 0xff, 512);
+        return true;
+
     } else {
         #if USE_INTERNAL
 
@@ -387,7 +392,7 @@ bool storage_read_block(uint8_t *dest, uint32_t block) {
 
 bool storage_write_block(const uint8_t *src, uint32_t block) {
     //printf("WR %u\n", block);
-    if (block == 0) {
+    if (block < FLASH_PART1_START_BLOCK) {
         // can't write MBR, but pretend we did
         return true;
 
