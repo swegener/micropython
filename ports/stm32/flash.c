@@ -106,9 +106,9 @@ static uint32_t get_page(uint32_t addr) {
 
 #endif
 
-uint32_t flash_get_sector_info(uint32_t addr, uint32_t *start_addr, uint32_t *size) {
+uint8_t flash_get_sector_info(uint32_t addr, uint32_t *start_addr, uint32_t *size) {
     if (addr >= flash_layout[0].base_address) {
-        uint32_t sector_index = 0;
+        uint8_t sector_index = 0;
         for (int i = 0; i < MP_ARRAY_SIZE(flash_layout); ++i) {
             for (int j = 0; j < flash_layout[i].sector_count; ++j) {
                 uint32_t sector_start_next = flash_layout[i].base_address

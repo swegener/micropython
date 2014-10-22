@@ -120,7 +120,7 @@ extern uint8_t _flash_fs_end;
 #define FLASH_FLAG_ERASED       (4)
 static bool flash_is_initialised;
 static __IO uint8_t flash_flags;
-static uint32_t flash_cache_sector_id;
+static uint8_t flash_cache_sector_id;
 static uint32_t flash_cache_sector_start;
 static uint32_t flash_cache_sector_size;
 static uint32_t flash_tick_counter_last_write;
@@ -137,7 +137,7 @@ static void flash_cache_flush(void) {
 static uint8_t *flash_cache_get_addr_for_write(uint32_t flash_addr) {
     uint32_t flash_sector_start;
     uint32_t flash_sector_size;
-    uint32_t flash_sector_id = flash_get_sector_info(flash_addr, &flash_sector_start, &flash_sector_size);
+    uint8_t flash_sector_id = flash_get_sector_info(flash_addr, &flash_sector_start, &flash_sector_size);
     if (flash_sector_size > FLASH_SECTOR_SIZE_MAX) {
         flash_sector_size = FLASH_SECTOR_SIZE_MAX;
     }
@@ -154,7 +154,7 @@ static uint8_t *flash_cache_get_addr_for_write(uint32_t flash_addr) {
 static uint8_t *flash_cache_get_addr_for_read(uint32_t flash_addr) {
     uint32_t flash_sector_start;
     uint32_t flash_sector_size;
-    uint32_t flash_sector_id = flash_get_sector_info(flash_addr, &flash_sector_start, &flash_sector_size);
+    uint8_t flash_sector_id = flash_get_sector_info(flash_addr, &flash_sector_start, &flash_sector_size);
     if (flash_cache_sector_id == flash_sector_id) {
         // in cache, copy from there
         return (uint8_t*)CACHE_MEM_START_ADDR + flash_addr - flash_sector_start;
