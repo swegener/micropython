@@ -117,7 +117,6 @@ extern uint8_t _flash_fs_end;
 
 #define FLASH_FLAG_DIRTY        (1)
 #define FLASH_FLAG_FORCE_WRITE  (2)
-#define FLASH_FLAG_ERASED       (4)
 static bool flash_is_initialised;
 static __IO uint8_t flash_flags;
 static uint8_t flash_cache_sector_id;
@@ -161,6 +160,36 @@ static uint8_t *flash_cache_get_addr_for_read(uint32_t flash_addr) {
     }
     // not in cache, copy straight from flash
     return (uint8_t*)flash_addr;
+}
+
+typedef enum {
+    FLASH_UNCHANGED, // no changes in sector
+    FLASH_PROGRAM, // only changes not requiring an erase
+    FLASH_ERASE, // changes requiring an erase
+} flash_cache_compare_result;
+
+static flash_cache_compare_result flash_cache_compare(void) {
+    const uint32_t *cache = (const uint32_t *)CACHE_MEM_START_ADDR;
+    const uint32_t *flash = (const uint32_t *)flash_cache_sector_start;
+    flash_cache_compare_result result = FLASH_UNCHANGED;
+
+    for (int word = 0; word < flash_cache_sector_size / 4; word++) {
+        uint32_t changed = flash[word] ^ cache[word];
+
+        if (!changed) {
+            // no bits to be changed
+            continue;
+        } else if (!(cache[word] & changed)) {
+            // only bits to be unset, can do without erase
+            result = FLASH_PROGRAM;
+        } else {
+            // some bits to be set, needs erase
+            result = FLASH_ERASE;
+            break;
+        }
+    }
+
+    return result;
 }
 
 #else
@@ -241,22 +270,25 @@ void storage_irq_handler(void) {
     }
     */
 
-    // This code erases the flash directly, waiting for it to finish
-    if (!(flash_flags & FLASH_FLAG_ERASED)) {
-        flash_erase(flash_cache_sector_start, (const uint32_t*)CACHE_MEM_START_ADDR, flash_cache_sector_size / 4);
-        flash_flags |= FLASH_FLAG_ERASED;
-        return;
-    }
-
     // If not a forced write, wait at least 5 seconds after last write to flush
     // On file close and flash unmount we get a forced write, so we can afford to wait a while
     if ((flash_flags & FLASH_FLAG_FORCE_WRITE) || sys_tick_has_passed(flash_tick_counter_last_write, 5000)) {
-        // sync the cache RAM buffer by writing it to the flash page
-        flash_write(flash_cache_sector_start, (const uint32_t*)CACHE_MEM_START_ADDR, flash_cache_sector_size / 4);
-        // clear the flash flags now that we have a clean cache
-        flash_flags = 0;
-        // indicate a clean cache with LED off
-        led_state(PYB_LED_RED, 0);
+        flash_cache_compare_result result = flash_cache_compare();
+        switch (result) {
+            case FLASH_ERASE:
+                // This code erases the flash directly, waiting for it to finish
+                flash_erase(flash_cache_sector_start, (const uint32_t*)CACHE_MEM_START_ADDR, flash_cache_sector_size / 4);
+                // on the next iteration we continue with FLASH_PROGRAM or FLASH_UNCHANGED
+                return;
+            case FLASH_PROGRAM:
+                // sync the cache RAM buffer by writing it to the flash page
+                flash_write(flash_cache_sector_start, (const uint32_t*)CACHE_MEM_START_ADDR, flash_cache_sector_size / 4);
+            case FLASH_UNCHANGED:
+                // clear the flash flags now that we have a clean cache
+                flash_flags = 0;
+                // indicate a clean cache with LED off
+                led_state(PYB_LED_RED, 0);
+        }
     }
 
     #endif
