@@ -93,8 +93,12 @@ void NORETURN __fatal_error(const char *msg) {
         for (volatile uint delay = 0; delay < 10000000; delay++) {
         }
         if (i >= 16) {
+#ifndef NDEBUG
+            __BKPT(0);
+#else
             // to conserve power
             __WFI();
+#endif
         }
     }
 }
