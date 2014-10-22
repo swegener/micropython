@@ -148,9 +148,6 @@ static uint8_t *flash_cache_get_addr_for_write(uint32_t flash_addr) {
         flash_cache_sector_start = flash_sector_start;
         flash_cache_sector_size = flash_sector_size;
     }
-    flash_flags |= FLASH_FLAG_DIRTY;
-    led_state(PYB_LED_RED, 1); // indicate a dirty cache with LED on
-    flash_tick_counter_last_write = HAL_GetTick();
     return (uint8_t*)CACHE_MEM_START_ADDR + flash_addr - flash_sector_start;
 }
 
@@ -403,6 +400,9 @@ bool storage_write_block(const uint8_t *src, uint32_t block) {
         }
         uint8_t *dest = flash_cache_get_addr_for_write(flash_addr);
         memcpy(dest, src, FLASH_BLOCK_SIZE);
+        flash_flags |= FLASH_FLAG_DIRTY;
+        led_state(PYB_LED_RED, 1); // indicate a dirty cache with LED on
+        flash_tick_counter_last_write = HAL_GetTick();
         return true;
 
         #else
