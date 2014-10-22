@@ -118,8 +118,8 @@ extern uint8_t _flash_fs_end;
 #define FLASH_FLAG_DIRTY        (1)
 #define FLASH_FLAG_FORCE_WRITE  (2)
 #define FLASH_FLAG_ERASED       (4)
-static bool flash_is_initialised = false;
-static __IO uint8_t flash_flags = 0;
+static bool flash_is_initialised;
+static __IO uint8_t flash_flags;
 static uint32_t flash_cache_sector_id;
 static uint32_t flash_cache_sector_start;
 static uint32_t flash_cache_sector_size;
@@ -195,11 +195,7 @@ STATIC const mp_spiflash_t spiflash = {
 
 void storage_init(void) {
     if (!flash_is_initialised) {
-        #if USE_INTERNAL
-        flash_flags = 0;
-        flash_cache_sector_id = 0;
-        flash_tick_counter_last_write = 0;
-        #else
+        #if !USE_INTERNAL
         mp_spiflash_init((mp_spiflash_t*)&spiflash);
         #endif
         flash_is_initialised = true;
