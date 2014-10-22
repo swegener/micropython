@@ -164,11 +164,10 @@ void flash_erase(uint32_t flash_dest, const uint32_t *src, uint32_t num_word32) 
     #endif
 
     uint32_t SectorError = 0;
-    if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
-        // error occurred during sector erase
-        HAL_FLASH_Lock(); // lock the flash
-        return;
-    }
+    HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+
+    // lock the flash
+    HAL_FLASH_Lock();
 }
 
 /*
@@ -201,6 +200,9 @@ void flash_erase_it(uint32_t flash_dest, const uint32_t *src, uint32_t num_word3
 */
 
 void flash_write(uint32_t flash_dest, const uint32_t *src, uint32_t num_word32) {
+    // unlock
+    HAL_FLASH_Unlock();
+
     #if defined(MCU_SERIES_L4)
 
     // program the flash uint64 by uint64
