@@ -355,6 +355,27 @@ static uint32_t convert_block_to_flash_addr(uint32_t block) {
 
 #endif
 
+void storage_erase(void) {
+#if USE_INTERNAL
+    uint32_t flash_addr;
+    uint32_t flash_sector_start;
+    uint32_t flash_sector_size;
+    uint32_t block;
+
+    for (block = FLASH_PART1_START_BLOCK; block < FLASH_PART1_START_BLOCK + FLASH_PART1_NUM_BLOCKS;) {
+        flash_addr = convert_block_to_flash_addr(block);
+        if (flash_addr == -1)
+            break;
+        flash_get_sector_info(flash_addr, &flash_sector_start, &flash_sector_size);
+        flash_erase(flash_addr, NULL, flash_sector_size / 4);
+        block += flash_sector_size / 512;
+    }
+
+    flash_cache_sector_id = 0;
+    flash_flags = 0;
+#endif
+}
+
 bool storage_read_block(uint8_t *dest, uint32_t block) {
     //printf("RD %u\n", block);
     if (block == 0) {

@@ -180,6 +180,9 @@ MP_NOINLINE STATIC bool init_flash_fs(uint reset_mode) {
         led_state(PYB_LED_GREEN, 1);
         uint32_t start_tick = HAL_GetTick();
 
+        // erase complete flash
+        storage_erase();
+
         uint8_t working_buf[_MAX_SS];
         res = f_mkfs(&vfs_fat->fatfs, FM_FAT, 0, working_buf, sizeof(working_buf));
         if (res == FR_OK) {
