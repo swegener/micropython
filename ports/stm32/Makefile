@@ -511,6 +511,14 @@ $(BUILD)/firmware.elf: $(OBJ)
 	$(Q)$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 	$(Q)$(SIZE) $@
 
+GDB_TARGET = localhost:4242
+GDB_INIT_EVAL_COMMAND = --init-eval-command="target extended-remote $(GDB_TARGET)"
+
+.PHONY: gdb
+
+gdb: $(BUILD)/firmware.elf
+	$(GDB) $(GDB_INIT_EVAL_COMMAND) $<
+
 PLLVALUES = boards/pllvalues.py
 MAKE_PINS = boards/make-pins.py
 BOARD_PINS = boards/$(BOARD)/pins.csv
