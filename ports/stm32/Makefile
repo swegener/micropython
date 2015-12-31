@@ -494,12 +494,25 @@ deploy-openocd: $(BUILD)/firmware.dfu
 	$(ECHO) "Writing $(BUILD)/firmware{0,1}.bin to the board via ST-LINK using OpenOCD"
 	$(Q)$(OPENOCD) -f $(OPENOCD_CONFIG) -c "stm_flash $(BUILD)/firmware0.bin $(TEXT0_ADDR) $(BUILD)/firmware1.bin $(TEXT1_ADDR)"
 
-$(BUILD)/firmware.dfu: $(BUILD)/firmware.elf
-	$(ECHO) "GEN $@"
-	$(Q)$(OBJCOPY) -O binary -j .isr_vector $^ $(BUILD)/firmware0.bin
-	$(Q)$(OBJCOPY) -O binary -j .text -j .data $^ $(BUILD)/firmware1.bin
-	$(Q)$(PYTHON) $(DFU) -b $(TEXT0_ADDR):$(BUILD)/firmware0.bin -b $(TEXT1_ADDR):$(BUILD)/firmware1.bin $@
+# The addresses and extracted sections for the .bin files must match the ones
+# used in the $(LD_FILE) linker file.
 
+firmware0_ADDR = $(TEXT0_ADDR)
+firmware0_SECTIONS = .isr_vector
+FIRMWARE_FILES += $(BUILD)/firmware0.bin
+
+firmware1_ADDR = $(TEXT1_ADDR)
+firmware1_SECTIONS = .text .data
+FIRMWARE_FILES += $(BUILD)/firmware1.bin
+
+.INTERMEDIATE: $(FIRMWARE_FILES)
+$(FIRMWARE_FILES): $(BUILD)/firmware.elf
+	$(ECHO) "GEN $@"
+	$(Q)$(OBJCOPY) -O binary $(foreach section,$($(basename $(notdir $(@)))_SECTIONS),-j $(section)) $^ $@
+
+$(BUILD)/firmware.dfu: $(FIRMWARE_FILES)
+	$(ECHO) "GEN $@"
+	$(Q)$(PYTHON) $(DFU) $(foreach binfile,$(^),-b $($(basename $(notdir $(binfile)))_ADDR):$(binfile)) $@
 endif
 
 $(BUILD)/firmware.hex: $(BUILD)/firmware.elf
