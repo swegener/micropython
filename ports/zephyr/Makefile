@@ -105,5 +105,5 @@ outdir/$(BOARD)/Makefile: $(CONF_FILE)
 	mkdir -p outdir/$(BOARD) && cmake -DBOARD=$(BOARD) -DCONF_FILE=$(CONF_FILE) -Boutdir/$(BOARD) -H.
 
 $(Z_EXPORTS): outdir/$(BOARD)/Makefile
-	make --no-print-directory -C outdir/$(BOARD) outputexports CMAKE_COMMAND=: >$@
-	make -C outdir/$(BOARD) syscall_macros_h_target syscall_list_h_target kobj_types_h_target
+	$(MAKE) --no-print-directory -C outdir/$(BOARD) outputexports CMAKE_COMMAND=: >$@
+	$(MAKE) -C outdir/$(BOARD) syscall_macros_h_target syscall_list_h_target kobj_types_h_target

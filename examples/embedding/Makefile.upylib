@@ -185,13 +185,13 @@ libffi:
 	cd $(MPTOP)/lib/libffi; ./autogen.sh
 	mkdir -p $(MPTOP)/lib/libffi/build_dir; cd $(MPTOP)/lib/libffi/build_dir; \
 	../configure $(CROSS_COMPILE_HOST) --prefix=$$PWD/out CC="$(CC)" CXX="$(CXX)" LD="$(LD)"; \
-	make install-exec-recursive; make -C include install-data-am
+	$(MAKE) install-exec-recursive; $(MAKE) -C include install-data-am
 
 axtls: $(MPTOP)/lib/axtls/README
 	cd $(MPTOP)/lib/axtls; cp config/upyconfig config/.config
-	cd $(MPTOP)/lib/axtls; make oldconfig -B
-	cd $(MPTOP)/lib/axtls; make clean
-	cd $(MPTOP)/lib/axtls; make all CC="$(CC)" LD="$(LD)"
+	cd $(MPTOP)/lib/axtls; $(MAKE) oldconfig -B
+	cd $(MPTOP)/lib/axtls; $(MAKE) clean
+	cd $(MPTOP)/lib/axtls; $(MAKE) all CC="$(CC)" LD="$(LD)"
 
 $(MPTOP)/lib/axtls/README:
 	@echo "You cloned without --recursive, fetching submodules for you."
