@@ -187,7 +187,7 @@ libffi:
 	../configure $(CROSS_COMPILE_HOST) --prefix=$$PWD/out CC="$(CC)" CXX="$(CXX)" LD="$(LD)"; \
 	$(MAKE) install-exec-recursive; $(MAKE) -C include install-data-am
 
-axtls: $(MPTOP)/lib/axtls/README
+<<<<<<< HEAD
 	cd $(MPTOP)/lib/axtls; cp config/upyconfig config/.config
 	cd $(MPTOP)/lib/axtls; $(MAKE) oldconfig -B
 	cd $(MPTOP)/lib/axtls; $(MAKE) clean
