@@ -63,7 +63,7 @@ def cat_together():
             lines = f.readlines()
             all_lines += lines
     all_lines.sort()
-    all_lines = b"\n".join(all_lines)
+    all_lines = b"".join(all_lines)
     outf.write(all_lines)
     outf.close()
     hasher.update(all_lines)
