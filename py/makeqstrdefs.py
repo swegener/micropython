@@ -76,12 +76,13 @@ def cat_together():
     except IOError:
         pass
     if old_hash != new_hash:
-        print("QSTR updated")
         try:
             # rename below might fail if file exists
             os.remove(args.output_file)
         except:
             pass
+    if not os.path.isfile(args.output_file):
+        print("QSTR updated")
         os.rename(args.output_dir + "/out", args.output_file)
         with open(args.output_file + ".hash", "w") as f:
             f.write(new_hash)
