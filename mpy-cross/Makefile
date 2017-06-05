@@ -34,6 +34,7 @@ CWARN = -Wall -Werror
 CWARN += -Wpointer-arith -Wuninitialized
 CFLAGS = $(INC) $(CWARN) -std=gnu99 $(CFLAGS_MOD) $(COPT) $(CFLAGS_EXTRA)
 CFLAGS += -fdata-sections -ffunction-sections -fno-asynchronous-unwind-tables
+CFLAGS += -fno-stack-protector
 
 # Debugging/Optimization
 ifdef DEBUG
